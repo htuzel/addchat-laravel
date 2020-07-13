@@ -16,6 +16,8 @@ class AddchatModel extends Model
         $this->ac_messages_tb               = 'ac_messages';
         $this->ac_users_messages_tb         = 'ac_users_messages';
         $this->ac_settings_tb               = 'ac_settings';
+        $this->reservations_tb              = 'reservations';
+        $this->role_user_tb                 = 'role_user';
         
         // fetch settings
         if(empty(session('ac_session')))
@@ -208,18 +210,40 @@ class AddchatModel extends Model
     {
         $query = DB::table($this->users_tb);
         
-        $query
-        ->select(array(
-            "$this->users_tb.$this->users_tb_id",
-            "$this->users_tb.$this->users_tb_email",
-            "$this->profiles_tb.avatar",
-            "$this->profiles_tb.fullname as username",
-            "$this->profiles_tb.status as online",
-
-            DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
-        ))
-        ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
-        ->where("$this->users_tb.$this->users_tb_id", "!=" , $login_user_id);
+        $roleQuery = DB::table($this->role_user_tb)->select('role_id')->where('user_id', $login_user_id)->first();
+        if ($roleQuery->role_id == 3) {
+            $query
+            ->select(array(
+                "$this->users_tb.$this->users_tb_id",
+                "$this->users_tb.$this->users_tb_email",
+                "$this->profiles_tb.avatar",
+                "$this->profiles_tb.fullname as username",
+                "$this->profiles_tb.status as online",
+    
+                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
+            ))
+            ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
+            ->leftJoin($this->reservations_tb, "$this->reservations_tb.student1_id", '=', "$this->users_tb.$this->users_tb_id")
+            ->where("$this->users_tb.$this->users_tb_id", "!=" , $login_user_id)
+            ->whereNotNull("$this->reservations_tb.student1_id")
+            ->groupBy("$this->reservations_tb.student1_id");
+        } else if ($roleQuery->role_id == 4) {
+            $query
+            ->select(array(
+                "$this->users_tb.$this->users_tb_id",
+                "$this->users_tb.$this->users_tb_email",
+                "$this->profiles_tb.avatar",
+                "$this->profiles_tb.fullname as username",
+                "$this->profiles_tb.status as online",
+    
+                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
+            ))
+            ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
+            ->leftJoin($this->reservations_tb, "$this->reservations_tb.teacher_id", '=', "$this->users_tb.$this->users_tb_id")
+            ->where("$this->users_tb.$this->users_tb_id", "!=" , $login_user_id)
+            ->whereNotNull("$this->reservations_tb.teacher_id")
+            ->groupBy("$this->reservations_tb.teacher_id");
+        }        
 
         // in case of search, search amongst all users
         if(!empty($params['filters']['search']) )
