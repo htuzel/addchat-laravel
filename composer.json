@@ -1,7 +1,7 @@
 {
-    "name": "classiebit/addchat-laravel",
+    "name": "htuzel/turacoon-chat",
     "version": "1.0.2",
-    "description": "Live chat widget for Laravel that also includes multi-user chat, group permissions, customer support chat & more.",
+    "description": "Live chat widget for Turacoon.",
     "keywords": [
         "laravel",
         "laravel-package",
@@ -9,17 +9,6 @@
         "vuejs"
     ],
     "license": "MIT",
-    "homepage": "https://classiebit.com/addchat-laravel",
-    "support": {
-        "issues": "https://github.com/classiebit/addchat-laravel/issues",
-        "source": "https://github.com/classiebit/addchat-laravel"
-    },
-    "authors": [
-        {
-            "name": "Classiebit",
-            "email": "info@classiebit.com"
-        }
-    ],
     "require": {
         "illuminate/support": "~5.5|~6.0"
     },

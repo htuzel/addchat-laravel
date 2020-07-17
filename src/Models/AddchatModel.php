@@ -215,9 +215,8 @@ class AddchatModel extends Model
             $query
             ->select(array(
                 "$this->users_tb.$this->users_tb_id",
-                "$this->users_tb.$this->users_tb_email",
                 "$this->profiles_tb.avatar",
-                "$this->profiles_tb.fullname as username",
+                DB::raw("CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', SUBSTRING_INDEX($this->users_tb.name, ' ', -1)) as username"),
                 "$this->profiles_tb.status as online",
     
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
@@ -231,9 +230,8 @@ class AddchatModel extends Model
             $query
             ->select(array(
                 "$this->users_tb.$this->users_tb_id",
-                "$this->users_tb.$this->users_tb_email",
                 "$this->profiles_tb.avatar",
-                "$this->profiles_tb.fullname as username",
+                DB::raw("CONCAT(CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', LEFT(SUBSTRING_INDEX($this->users_tb.name, ' ', -1), 1)), '', '.') as username"),
                 "$this->profiles_tb.status as online",
     
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
