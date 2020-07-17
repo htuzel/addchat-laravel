@@ -16,7 +16,6 @@ class AddchatModel extends Model
         $this->ac_messages_tb               = 'ac_messages';
         $this->ac_users_messages_tb         = 'ac_users_messages';
         $this->ac_settings_tb               = 'ac_settings';
-        $this->reservations_tb              = 'reservations';
         $this->role_user_tb                 = 'role_user';
         
         // fetch settings
@@ -234,10 +233,9 @@ class AddchatModel extends Model
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
-            ->leftJoin($this->reservations_tb, "$this->reservations_tb.student1_id", '=', "$this->users_tb.$this->users_tb_id")
+            ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->where("$this->users_tb.$this->users_tb_id", "!=" , $login_user_id)
-            ->whereNotNull("$this->reservations_tb.student1_id")
-            ->groupBy("$this->reservations_tb.student1_id");
+            ->where("$this->role_user_tb.role_id", 4);
         } else if ($roleQuery->role_id == 4) {
             $query
             ->select(array(
@@ -249,10 +247,9 @@ class AddchatModel extends Model
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
-            ->leftJoin($this->reservations_tb, "$this->reservations_tb.teacher_id", '=', "$this->users_tb.$this->users_tb_id")
+            ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->where("$this->users_tb.$this->users_tb_id", "!=" , $login_user_id)
-            ->whereNotNull("$this->reservations_tb.teacher_id")
-            ->groupBy("$this->reservations_tb.teacher_id");
+            ->where("$this->role_user_tb.role_id", 3);
         }        
 
         // in case of search, search amongst all users
