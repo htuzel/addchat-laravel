@@ -188,14 +188,26 @@ class AddchatModel extends Model
     // get specific user by id
     public function get_user($login_user_id  = 0, $params = [])
     {
-        $select = array(
-            "$this->users_tb.$this->users_tb_id",
-            "$this->users_tb.$this->users_tb_email",
-
-            "$this->profiles_tb.fullname",
-            "$this->profiles_tb.avatar",
-            "$this->profiles_tb.status as online",
-        );
+        $roleQuery = DB::table($this->role_user_tb)->select('role_id')->where('user_id', $login_user_id)->first();
+        if ($roleQuery->role_id == 3) {
+            $select = array(
+                "$this->users_tb.$this->users_tb_id",
+                "$this->users_tb.$this->users_tb_email",
+    
+                DB::raw("CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', SUBSTRING_INDEX($this->users_tb.name, ' ', -1)) as fullname"),
+                "$this->profiles_tb.avatar",
+                "$this->profiles_tb.status as online",
+            );
+        } else if ($roleQuery->role_id == 4) {
+            $select = array(
+                "$this->users_tb.$this->users_tb_id",
+                "$this->users_tb.$this->users_tb_email",
+    
+                DB::raw("CONCAT(CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', LEFT(SUBSTRING_INDEX($this->users_tb.name, ' ', -1), 1)), '', '.') as fullname"),
+                "$this->profiles_tb.avatar",
+                "$this->profiles_tb.status as online",
+            );
+        }   
         
         return  DB::table($this->users_tb)
                     ->select($select)
