@@ -230,7 +230,7 @@ class AddchatModel extends Model
                 DB::raw("CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', SUBSTRING_INDEX($this->users_tb.name, ' ', -1)) as username"),
                 "$this->profiles_tb.status as online",
     
-                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
+                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id AND ACM.is_read = '0') as unread"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
@@ -244,7 +244,7 @@ class AddchatModel extends Model
                 DB::raw("CONCAT(CONCAT(SUBSTRING_INDEX($this->users_tb.name, ' ', 1), ' ', LEFT(SUBSTRING_INDEX($this->users_tb.name, ' ', -1), 1)), '', '.') as username"),
                 "$this->profiles_tb.status as online",
     
-                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = '$this->users_tb.$this->users_tb_id' AND ACM.is_read = '0') as unread"),
+                DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id AND ACM.is_read = '0') as unread"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
@@ -258,14 +258,15 @@ class AddchatModel extends Model
             // admin can seach all users
             // and if have  is_groups off then user can search all users
             $query
-            ->whereRaw("($this->profiles_tb.fullname LIKE '%".$params['filters']['search']."%' 
+            ->whereRaw("($this->users_tb.name LIKE '%".$params['filters']['search']."%' 
                     OR $this->users_tb.$this->users_tb_email LIKE '%".$params['filters']['search']."%')");
         }
         
         return  $query
                 ->limit($params['filters']['limit'])
                 ->offset($params['filters']['offset'])
-                ->get()
+                ->orderBy('unread', 'desc')
+                ->get()                
                 ->toArray();
     }
 
