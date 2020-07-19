@@ -231,6 +231,7 @@ class AddchatModel extends Model
                 "$this->profiles_tb.status as online",
     
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id AND ACM.is_read = '0') as unread"),
+                DB::raw("(SELECT MAX(dt_updated) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id) as last_message_date"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
@@ -245,6 +246,7 @@ class AddchatModel extends Model
                 "$this->profiles_tb.status as online",
     
                 DB::raw("(SELECT IF(COUNT(ACM.id) > 0, COUNT(ACM.id), null) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id AND ACM.is_read = '0') as unread"),
+                DB::raw("(SELECT MAX(dt_updated) FROM $this->ac_messages_tb ACM WHERE ACM.m_to = '$login_user_id' AND ACM.m_from = $this->users_tb.$this->users_tb_id) as last_message_date"),
             ))
             ->leftJoin($this->profiles_tb, "$this->profiles_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
             ->leftJoin($this->role_user_tb, "$this->role_user_tb.user_id",  '=' ,"$this->users_tb.$this->users_tb_id")
@@ -265,7 +267,7 @@ class AddchatModel extends Model
         return  $query
                 ->limit($params['filters']['limit'])
                 ->offset($params['filters']['offset'])
-                ->orderBy('unread', 'desc')
+                ->orderBy('last_message_date', 'desc')
                 ->get()                
                 ->toArray();
     }
